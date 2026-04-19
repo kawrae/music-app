@@ -2,13 +2,13 @@
 
 ## Abstract
 
-This music-app is a mobile-first React single-page application designed to capture, organise, and review music ideas in one interface. The project supports track creation with text notes, cover images, and audio clips, then persists those records using browser-based storage so the app can run without a backend.
+This music-app is a mobile-first React single-page application designed to capture, organise, and review music ideas in one interface, the project supports track creation with text notes, cover images, and audio clips, then persists those records using browser-based storage so the app can run without a backend.
 
 This repository is structured as a standalone submission-ready codebase with clear separation of pages, reusable components, and data utilities.
 
 ## Project Purpose and Scope
 
-The project addresses a common workflow issue for musicians and creators: idea capture is often fragmented across separate apps (voice memos, photo gallery, notes). This music-app combines those functions into a single interface to reduce capture friction and improve retrieval of previously recorded ideas.
+This music-app allows users to store voice memos, upload tracks or write down ideas / memos all in one workflow.
 
 Primary goals:
 
@@ -56,6 +56,7 @@ The project demonstrates multiple browser/device APIs:
 
 - FileReader API: Converts selected files to storable data URLs.
 - Camera capture (file input capture flow): Supports direct media acquisition on mobile.
+- MediaRecorder API: Captures audio directly from the user’s device (e.g. microphone/voice recording).
 - Canvas API: Crops and normalises image assets.
 - Notification API: Provides user status feedback.
 - Vibration API: Adds tactile confirmation for key interactions (supported devices only).
@@ -130,7 +131,7 @@ vercel --prod
 ```
 
 
-This repository was created by moving/copying the project from the original `dwt>assessment` repository into a dedicated standalone repository for clarity and cleaner project presentation. As a result, commit history from the source repository was not carried into this new repository. This is intentional and reflects a repository-structure decision rather than missing development activity.
+This repository was created by moving/copying the project from the original `dwt>assessment` repository into a dedicated standalone repository for clarity and cleaner project presentation. As a result, commit history from the source repository was not carried into this new repository.
 
 ## Academic Integrity and Usage
 
