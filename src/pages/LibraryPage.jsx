@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { ArrowLeft, Menu } from "lucide-react";
 import usePersistedState from "../hooks/usePersistedState";
 import Sidebar from "../components/Sidebar";
@@ -8,11 +7,14 @@ import TrackModal from "../components/TrackModal";
 import { deleteMedia, updateMedia } from "../db";
 
 function LibraryPage() {
+
+  // state for mobile sidebar, saved tracks, search input and selected track modal
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tracks, setTracks] = usePersistedState("music-library-tracks", []);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTrack, setSelectedTrack] = useState(null);
 
+  // filters the library in real time by title notes or track type
   const filteredTracks = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
@@ -31,10 +33,12 @@ function LibraryPage() {
     });
   }, [tracks, searchTerm]);
 
+  // closes the track modal
   function closeModal() {
     setSelectedTrack(null);
   }
 
+  // toggles favourite status in both the track list and selected modal view
   function toggleFavourite(trackId) {
     setTracks((prev) =>
       prev.map((track) =>
@@ -51,6 +55,7 @@ function LibraryPage() {
     );
   }
 
+  // deletes a track after confirmation and removes its stored media from indexedDB
   async function deleteTrack(trackId) {
     const trackToDelete = tracks.find((track) => track.id === trackId);
     const trackTitle = trackToDelete?.title?.trim() || "this track";
@@ -70,6 +75,7 @@ function LibraryPage() {
     }
   }
 
+  // updates track details and media when edits are saved from the modal
   async function updateTrack(trackId, updates) {
     const now = new Date().toISOString();
 
@@ -167,6 +173,7 @@ function LibraryPage() {
         </main>
       </div>
 
+      {/* modal for viewing, editing, favouriting and deleting a track */}
       <TrackModal
         track={selectedTrack}
         onClose={closeModal}

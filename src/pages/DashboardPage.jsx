@@ -11,6 +11,7 @@ import IdeasPanel from "../components/IdeasPanel";
 import StoragePanel from "../components/StoragePanel";
 import TrackModal from "../components/TrackModal";
 
+// empty track form on page load
 const emptyTrackForm = {
   title: "",
   notes: "",
@@ -20,6 +21,8 @@ const emptyTrackForm = {
 };
 
 function DashboardPage() {
+
+  // main app state for saved tracks, search, editing, viewing and mobile sidebar
   const [tracks, setTracks] = usePersistedState("music-library-tracks", []);
   const [searchTerm, setSearchTerm] = useState("");
   const [toasts, setToasts] = useState([]);
@@ -28,20 +31,24 @@ function DashboardPage() {
   const [viewingTrack, setViewingTrack] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // refs allow file inputs to be cleared manually after upload/cancel
   const coverInputRef = useRef(null);
   const audioInputRef = useRef(null);
 
+  // clears both file input elements
   function clearFileInputs() {
     if (coverInputRef.current) coverInputRef.current.value = "";
     if (audioInputRef.current) audioInputRef.current.value = "";
   }
 
+  // resets form to default state and exits editing mode
   function resetForm() {
     setTrackForm(emptyTrackForm);
     setEditingTrackId(null);
     clearFileInputs();
   }
 
+  // resuable helper for updating one field inside the track form
   function updateTrackForm(field, value) {
     setTrackForm((prev) => ({
       ...prev,
@@ -49,17 +56,20 @@ function DashboardPage() {
     }));
   }
 
+  // attaches recorded audio from the recording feature into the current form
   function handleRecordingReady(audioUrl) {
     updateTrackForm("audioUrl", audioUrl);
     notifyUser("Audio ready", "Voice recording is attached.");
   }
 
+  // crop cover image to square before storing
   async function handleCoverReady(coverUrl) {
     const squareCover = await cropImageDataUrlToSquare(coverUrl);
     updateTrackForm("coverArt", squareCover);
     notifyUser("Cover ready", "Cover photo is attached.");
   }
 
+  // clears temporary media from the form without deleting saved tracks
   function handleClearTracks() {
     updateTrackForm("audioUrl", "");
     updateTrackForm("coverArt", "");
@@ -68,6 +78,7 @@ function DashboardPage() {
     showToast("Temporary media cleared.");
   }
 
+  // temporary toast notification inside the UI
   function showToast(message) {
     const id = nanoid();
     setToasts((prev) => [...prev, { id, message }]);
@@ -76,6 +87,7 @@ function DashboardPage() {
     }, 2600);
   }
 
+  // sends a browser notification if supported, else falls back to toast
   async function notifyUser(title, body = "") {
     const message = body ? `${title}: ${body}` : title;
 
@@ -101,12 +113,14 @@ function DashboardPage() {
     }
   }
 
+  // triggers device vibration on supported devices
   const vibrate = (pattern = 200) => {
     if ('vibrate' in navigator) {
       navigator.vibrate(pattern);
     }
   };
 
+  // handles uploaded cover art from file input and crops to square before attaching to form
   async function handleCoverArtUpload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -122,6 +136,7 @@ function DashboardPage() {
     event.target.value = "";
   }
 
+  // handles uploaded audio file and converts to data URL before attaching to form
   async function handleAudioUpload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -135,6 +150,7 @@ function DashboardPage() {
     }
   }
 
+  // creates a new track object, stores metadata in state and media in indexedDB
   async function createTrack() {
     const trimmedTitle = trackForm.title.trim();
     const trimmedNotes = trackForm.notes.trim();
@@ -170,6 +186,7 @@ function DashboardPage() {
     resetForm();
   }
 
+  // saves changes to an existing track and updates its media in indexedDB if needed
   async function saveTrackEdit(trackId) {
     const trimmedTitle = trackForm.title.trim();
     const trimmedNotes = trackForm.notes.trim();
@@ -204,6 +221,7 @@ function DashboardPage() {
     resetForm();
   }
 
+  // loads an existing track and its media into the form for editing
   async function startEditing(track) {
     setEditingTrackId(track.id);
 
@@ -230,10 +248,12 @@ function DashboardPage() {
     }
   }
 
+  // exits editing mode and clears the form
   function cancelEditing() {
     resetForm();
   }
 
+  // asks for notification permission when the dashboard first loads
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then((permission) => {
@@ -244,14 +264,17 @@ function DashboardPage() {
     }
   }, []);
 
+  // opens the selected track inside the modal viewer
   function viewTrack(track) {
     setViewingTrack(track);
   }
 
+  // closes the track viewer modal
   function closeTrackView() {
     setViewingTrack(null);
   }
 
+  // deletes a track after confirmation and removes its stored media too
   async function deleteTrack(trackId) {
     const trackToDelete = tracks.find((track) => track.id === trackId);
     const trackTitle = trackToDelete?.title?.trim() || "this track";
@@ -278,6 +301,7 @@ function DashboardPage() {
     }
   }
 
+  // updates track details directly from the modal component
   async function updateTrackFromModal(trackId, updates) {
     const now = new Date().toISOString();
 
@@ -316,6 +340,7 @@ function DashboardPage() {
     vibrate();
   }
 
+  // toggle favourite status for a selected track
   function toggleFavourite(trackId) {
     setTracks((prev) =>
       prev.map((track) =>
@@ -326,6 +351,7 @@ function DashboardPage() {
     );
   }
 
+  // filter tracks based on search input (title, notes or type)
   const filteredTracks = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
@@ -376,12 +402,14 @@ function DashboardPage() {
             </button>
           </div>
 
+          {/* toats messages shown near the top of the screen */}
           {toasts.map((toast) => (
             <div key={toast.id} className="mx-4 mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100 shadow-lg shadow-emerald-950/20 lg:mx-6">
               {toast.message}
             </div>
           ))}
 
+          {/* top control area for search, uploads, create, edit and device features */}
           <HeaderBar
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -401,6 +429,7 @@ function DashboardPage() {
             onClearTracks={handleClearTracks}
           />
 
+          {/* main dashboard layout */}
           <section className="grid gap-8 px-4 py-6 lg:px-6 lg:py-8 xl:grid-cols-[1.7fr_1fr]">
             <IdeasPanel
               tracks={tracks}
@@ -428,6 +457,7 @@ function DashboardPage() {
         </main>
       </div>
 
+      {/* modal used to view and update an individual track */}
       <TrackModal
         track={viewingTrack}
         onClose={closeTrackView}

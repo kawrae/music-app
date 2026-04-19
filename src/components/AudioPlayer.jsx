@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Volume2 } from "lucide-react";
 
+// formats seconds into mm:ss for display in the UI
 function formatTime(time) {
   if (!Number.isFinite(time)) return "0:00";
   const minutes = Math.floor(time / 60);
@@ -11,31 +12,40 @@ function formatTime(time) {
 }
 
 function AudioPlayer({ src }) {
+  // reference to the native HTML audio element
   const audioRef = useRef(null);
+
+  // state for playback status, current time and total duration
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
+  // syncs React state with audio element events
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // fires when metadata (duration) is loaded
     function handleLoadedMetadata() {
       setDuration(audio.duration || 0);
     }
 
+    // updates current playback time continuously
     function handleTimeUpdate() {
       setCurrentTime(audio.currentTime || 0);
     }
 
+    // resets play state when audio finishes
     function handleEnded() {
       setIsPlaying(false);
     }
 
+    // attach event listerns to audio element
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("ended", handleEnded);
 
+    // cleanup listeners when component unmounts or src changes
     return () => {
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -43,6 +53,7 @@ function AudioPlayer({ src }) {
     };
   }, [src]);
 
+  // toggles between play and pause states
   async function togglePlayback() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -56,6 +67,7 @@ function AudioPlayer({ src }) {
     }
   }
 
+  // allows user to scrub through the track using the slider
   function handleSeek(event) {
     const audio = audioRef.current;
     if (!audio) return;

@@ -3,23 +3,28 @@ import { X } from "lucide-react";
 import { cropImageFileToSquare } from "../lib/image";
 
 function CameraGalleryChooser({ onClose, onCameraCapture, galleryInputRef }) {
+  // hidden file input used to trigger camera or gallery selection
   const deviceInputRef = useRef(null);
 
+  // handles file selection (camera or gallery), crops it and returns result
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     try {
+      // convert + crop image to square before passing it up
       const dataUrl = await cropImageFileToSquare(file);
       onCameraCapture(dataUrl);
     } catch (error) {
       console.error("Failed to read selected image:", error);
     } finally {
+      // reset input so same file can be selected again
       event.target.value = "";
       onClose();
     }
   };
 
+  // opens device camera
   const openCameraAttachment = () => {
     const input = deviceInputRef.current;
     if (!input) return;
@@ -29,6 +34,7 @@ function CameraGalleryChooser({ onClose, onCameraCapture, galleryInputRef }) {
     input.click();
   };
 
+  // opens device file picker/gallery
   const openGalleryAttachment = () => {
     const input = deviceInputRef.current;
     if (!input) return;
